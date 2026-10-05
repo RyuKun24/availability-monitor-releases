@@ -1,6 +1,6 @@
 {
   "name": "availability-monitor-launcher",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "description": "Launcher for Availability Monitor",
   "main": "main.js",
   "homepage": "./",
@@ -36,8 +36,8 @@
     ],
     "extraResources": [
       {
-        "from": "../dist/availability_monitor.exe",
-        "to": "availability_monitor.exe"
+        "from": "../dist/availability_monitor",
+        "to": "availability_monitor"
       }
     ],
     "asar": true,

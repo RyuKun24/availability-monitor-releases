@@ -109,7 +109,7 @@ def build_exe(version: str, output_dir: Optional[str] = None):
     # Build PyInstaller command as array for subprocess (handles paths/spaces correctly)
     cmd_parts = [
         pyinstaller_executable,
-        "--onefile",
+        "--onedir",
         "--windowed",
         "--name", "availability_monitor",
         "--distpath", output_dir,
@@ -140,7 +140,7 @@ def build_exe(version: str, output_dir: Optional[str] = None):
     if result.returncode != 0:
         raise RuntimeError(f"PyInstaller build failed with code {result.returncode}")
     
-    exe_path = Path(output_dir) / "availability_monitor.exe"
+    exe_path = Path(output_dir) / "availability_monitor" / "availability_monitor.exe"
     
     if exe_path.exists():
         file_size_mb = exe_path.stat().st_size / (1024 * 1024)

@@ -101,7 +101,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/availability_monitor.exe
             electron/dist/Availability-Monitor-Setup-*.exe
             electron/dist/Availability-Monitor-0*.exe
             electron/dist/latest.yml
@@ -112,7 +111,6 @@ jobs:
             # Release ${{ steps.version.outputs.VERSION }}
             
             ## Files
-            - `availability_monitor.exe` - Python backend (compiled)
             - `Availability-Monitor-Setup-*.exe` - Installer
             - `Availability-Monitor-0*.exe` - Portable executable
             

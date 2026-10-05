@@ -139,7 +139,7 @@ class PythonManager {
         // If running PyInstaller-compiled version
         if (app.isPackaged) {
             const resourcesPath = process.resourcesPath || path.join(app.getAppPath(), '..');
-            return path.join(resourcesPath, 'availability_monitor.exe');
+            return path.join(resourcesPath, 'availability_monitor', 'availability_monitor.exe');
         }
 
         // Development: use Python from virtual environment or system
