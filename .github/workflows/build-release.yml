@@ -102,8 +102,8 @@ jobs:
         with:
           files: |
             dist/availability_monitor.exe
-            electron/dist/Availability Monitor Setup *.exe
-            electron/dist/Availability Monitor-*.exe
+            electron/dist/Availability-Monitor-Setup-*.exe
+            electron/dist/Availability-Monitor-0*.exe
             electron/dist/latest.yml
             electron/dist/*.blockmap
           draft: false
@@ -113,8 +113,8 @@ jobs:
             
             ## Files
             - `availability_monitor.exe` - Python backend (compiled)
-            - `Availability Monitor Setup *.exe` - Installer
-            - `Availability Monitor-*.exe` - Portable executable
+            - `Availability-Monitor-Setup-*.exe` - Installer
+            - `Availability-Monitor-0*.exe` - Portable executable
             
             ## Installation
             1. Download the installer or portable version

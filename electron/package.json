@@ -1,6 +1,6 @@
 {
   "name": "availability-monitor-launcher",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "description": "Launcher for Availability Monitor",
   "main": "main.js",
   "homepage": "./",
@@ -69,10 +69,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Availability Monitor"
+      "shortcutName": "Availability Monitor",
+      "artifactName": "Availability-Monitor-Setup-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "${productName}-${version}.exe"
+      "artifactName": "Availability-Monitor-${version}.${ext}"
     },
     "publish": {
       "provider": "github",
