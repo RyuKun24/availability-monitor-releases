@@ -333,6 +333,7 @@
 
         <div class="buttons-section full">
             <button id="check-updates-btn" class="btn-secondary">🔄 Check for Updates</button>
+            <button id="install-update-btn" class="btn-success" style="display:none">⬇️ Install Update</button>
         </div>
 
         <div class="divider"></div>
@@ -386,6 +387,25 @@
             document.getElementById('store-logins-btn').addEventListener('click', openStoreLogins);
             document.getElementById('dashboard-btn').addEventListener('click', openDashboard);
             document.getElementById('check-updates-btn').addEventListener('click', checkForUpdates);
+            document.getElementById('install-update-btn').addEventListener('click', installUpdate);
+        }
+
+        async function installUpdate() {
+            const btn = document.getElementById('install-update-btn');
+            btn.disabled = true;
+            try {
+                addLog('Downloading update; the app will restart when ready...', 'info');
+                const result = await launcherApi.installUpdate();
+                if (result && !result.success) {
+                    addLog(`✗ Update install failed: ${result.error}`, 'error');
+                    showAlert(`Update install failed: ${result.error}`, 'error');
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
+                btn.disabled = false;
+            }
         }
 
         async function checkForUpdates() {
@@ -406,7 +426,10 @@
                     showAlert(`Update check failed: ${result.error || result.message}`, 'error');
                 } else if (result.updateAvailable) {
                     addLog(`✓ Update available: v${result.availableVersion}`, 'success');
-                    showAlert(`New version v${result.availableVersion} available. Downloading in the background.`, 'info');
+                    showAlert(`New version v${result.availableVersion} available. Click Install Update.`, 'info');
+                    const installBtn = document.getElementById('install-update-btn');
+                    installBtn.textContent = `⬇️ Install v${result.availableVersion}`;
+                    installBtn.style.display = '';
                 } else {
                     addLog(`✓ Already on the latest version (v${result.currentVersion})`, 'success');
                     showAlert('You are running the latest version.', 'success');
@@ -564,10 +587,11 @@
 
         function setupUpdateListeners() {
             launcherApi.onUpdateAvailable(() => {
-                showAlert('A new version is available. It will be downloaded in the background.', 'info');
+                showAlert('A new version is available. Use Check for Updates, then Install Update.', 'info');
             });
             
             launcherApi.onUpdateDownloaded(() => {
+                addLog('✓ Update downloaded', 'success');
                 showAlert('Update downloaded! The app will restart to install the update.', 'success');
             });
         }
