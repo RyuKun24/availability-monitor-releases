@@ -1,0 +1,83 @@
+{
+  "name": "availability-monitor-launcher",
+  "version": "0.1.22",
+  "description": "Launcher for Availability Monitor",
+  "main": "main.js",
+  "homepage": "./",
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "npm run build:portable",
+    "build:installer": "electron-builder --win --publish never",
+    "build-portable": "electron-builder --win portable --publish never",
+    "build:portable": "electron-builder --win portable --publish never",
+    "dist": "npm run build:installer",
+    "prestart": "node -e \"console.log('Starting Electron launcher...')\"",
+    "dev": "electron . --debug"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "electron-updater": "^6.1.0"
+  },
+  "build": {
+    "appId": "com.availability-monitor.launcher",
+    "productName": "Availability Monitor",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "utils/",
+      "node_modules/"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist/availability_monitor.exe",
+        "to": "availability_monitor.exe"
+      }
+    ],
+    "asar": true,
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "forceCodeSigning": false,
+      "signingHashAlgorithms": [
+        "sha256"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Availability Monitor"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "RyuKun24",
+      "repo": "availability-monitor-releases"
+    }
+  }
+}

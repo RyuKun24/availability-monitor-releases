@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Availability Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .status-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-left: 8px;
+        }
+
+        .status-indicator.running {
+            background: #4caf50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-indicator.stopped {
+            background: #f44336;
+        }
+
+        .buttons-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .buttons-section.full {
+            grid-template-columns: 1fr;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .logs-section {
+            background: #1e1e1e;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #00ff00;
+            border: 1px solid #333;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .log-entry.error {
+            color: #ff6b6b;
+        }
+
+        .log-entry.success {
+            color: #51cf66;
+        }
+
+        .log-entry.warning {
+            color: #ffd43b;
+        }
+
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 15px 0;
+        }
+
+        .settings-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .settings-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .settings-item {
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .settings-label {
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .settings-value {
+            color: #333;
+            font-family: monospace;
+            word-break: break-all;
+            background: white;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .settings-value.masked {
+            color: #999;
+        }
+
+        .alert {
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .alert.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .alert.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            button {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Availability Monitor</h1>
+            <p id="app-version">v...</p>
+        </div>
+
+        <div id="alerts"></div>
+
+        <div class="status-section">
+            <div class="status-item">
+                <span class="status-label">Backend Status</span>
+                <span>
+                    <span id="python-status" class="status-indicator stopped"></span>
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Chrome Debug</span>
+                <span>
+                    <span id="chrome-status" class="status-indicator stopped"></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="buttons-section">
+            <button id="start-btn" class="btn-success">▶️ Start</button>
+            <button id="stop-btn" class="btn-secondary" disabled>⏸️ Stop</button>
+        </div>
+
+        <div class="buttons-section">
+            <button id="open-chrome-btn" class="btn-warning">🌐 Open Chrome</button>
+            <button id="close-chrome-btn" class="btn-secondary" disabled>❌ Close Chrome</button>
+        </div>
+
+        <div class="buttons-section full">
+            <button id="dashboard-btn" class="btn-info" disabled>📊 Open Dashboard</button>
+        </div>
+
+        <div class="buttons-section full">
+            <button id="check-updates-btn" class="btn-secondary">🔄 Check for Updates</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="settings-section">
+            <div class="settings-title">Configuration</div>
+            <div class="settings-item">
+                <div class="settings-label">Telegram Status</div>
+                <div class="settings-value" id="telegram-status">Checking...</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-label">Monitored URLs</div>
+                <div class="settings-value" id="urls-count">0</div>
+            </div>
+        </div>
+
+        <div class="logs-section" id="logs"></div>
+    </div>
+
+    <script>
+        const launcherApi = window.electronAPI;
+        let updateCheckInterval = null;
+        let statusCheckInterval = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeButtons();
+            loadAppVersion();
+            updateStatus();
+            updateSettings();
+            setupUpdateListeners();
+            
+            // Auto-refresh status
+            statusCheckInterval = setInterval(updateStatus, 2000);
+        });
+
+        async function loadAppVersion() {
+            try {
+                const version = await launcherApi.getAppVersion();
+                document.getElementById('app-version').textContent = `v${version}`;
+            } catch (error) {
+                document.getElementById('app-version').textContent = 'v?';
+            }
+        }
+
+        function initializeButtons() {
+            document.getElementById('start-btn').addEventListener('click', startBackend);
+            document.getElementById('stop-btn').addEventListener('click', stopBackend);
+            document.getElementById('open-chrome-btn').addEventListener('click', openChrome);
+            document.getElementById('close-chrome-btn').addEventListener('click', closeChrome);
+            document.getElementById('dashboard-btn').addEventListener('click', openDashboard);
+            document.getElementById('check-updates-btn').addEventListener('click', checkForUpdates);
+        }
+
+        async function checkForUpdates() {
+            const btn = document.getElementById('check-updates-btn');
+            btn.disabled = true;
+            try {
+                addLog('Checking for updates...', 'info');
+                const result = await launcherApi.checkUpdates();
+
+                if (!result) {
+                    addLog('✗ Update check returned no data.', 'error');
+                    showAlert('Update check returned no data.', 'error');
+                } else if (result.status === 'not_packaged' || result.status === 'no_update_config') {
+                    addLog(`ℹ ${result.message}`, 'warning');
+                    showAlert(result.message, 'info');
+                } else if (result.status === 'error' || result.error) {
+                    addLog(`✗ Update check failed: ${result.error || result.message}`, 'error');
+                    showAlert(`Update check failed: ${result.error || result.message}`, 'error');
+                } else if (result.updateAvailable) {
+                    addLog(`✓ Update available: v${result.availableVersion}`, 'success');
+                    showAlert(`New version v${result.availableVersion} available. Downloading in the background.`, 'info');
+                } else {
+                    addLog(`✓ Already on the latest version (v${result.currentVersion})`, 'success');
+                    showAlert('You are running the latest version.', 'success');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function startBackend() {
+            try {
+                addLog('Starting backend...', 'info');
+                const result = await launcherApi.startPython();
+                
+                if (result.success) {
+                    addLog('✓ Backend started successfully', 'success');
+                    updateStatus();
+                } else {
+                    addLog(`✗ Failed to start backend: ${result.error}`, 'error');
+                    showAlert(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function stopBackend() {
+            try {
+                addLog('Stopping backend...', 'warning');
+                const result = await launcherApi.stopPython();
+                
+                if (result.success) {
+                    addLog('✓ Backend stopped', 'success');
+                    updateStatus();
+                } else {
+                    addLog(`✗ Failed to stop backend: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function openChrome() {
+            try {
+                addLog('Opening Chrome...', 'info');
+                const result = await launcherApi.openChrome();
+                
+                if (result.success) {
+                    addLog('✓ Chrome opened on port 9222', 'success');
+                    updateStatus();
+                } else {
+                    addLog(`✗ Failed to open Chrome: ${result.error}`, 'error');
+                    showAlert(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function closeChrome() {
+            try {
+                addLog('Closing Chrome...', 'warning');
+                const result = await launcherApi.closeChrome();
+                
+                if (result.success) {
+                    addLog('✓ Chrome closed', 'success');
+                    updateStatus();
+                } else {
+                    addLog(`✗ Failed to close Chrome: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function openDashboard() {
+            try {
+                addLog('Opening dashboard...', 'info');
+                await launcherApi.openDashboard();
+                addLog('✓ Dashboard opened in browser', 'success');
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateStatus() {
+            try {
+                const status = await launcherApi.getStatus();
+                
+                // Update indicators
+                const pythonIndicator = document.getElementById('python-status');
+                const chromeIndicator = document.getElementById('chrome-status');
+                
+                pythonIndicator.classList.toggle('running', status.pythonRunning);
+                pythonIndicator.classList.toggle('stopped', !status.pythonRunning);
+                
+                chromeIndicator.classList.toggle('running', status.chromeRunning);
+                chromeIndicator.classList.toggle('stopped', !status.chromeRunning);
+                
+                // Enable/disable buttons
+                document.getElementById('start-btn').disabled = status.pythonRunning;
+                document.getElementById('stop-btn').disabled = !status.pythonRunning;
+                document.getElementById('dashboard-btn').disabled = !status.pythonRunning;
+                
+                document.getElementById('open-chrome-btn').disabled = status.chromeRunning;
+                document.getElementById('close-chrome-btn').disabled = !status.chromeRunning;
+                
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        async function updateSettings() {
+            try {
+                const settings = await launcherApi.getSettings();
+                
+                if (!settings || settings.error) {
+                    document.getElementById('telegram-status').textContent = 'Not configured';
+                    document.getElementById('urls-count').textContent = '0';
+                    return;
+                }
+                
+                const telegramConfigured = settings.telegram_bot_token_configured ? '✓ Configured' : '✗ Not configured';
+                document.getElementById('telegram-status').textContent = telegramConfigured;
+                document.getElementById('urls-count').textContent = settings.urls.length + ' URLs';
+                
+            } catch (error) {
+                console.error('Error updating settings:', error);
+            }
+        }
+
+        function setupUpdateListeners() {
+            launcherApi.onUpdateAvailable(() => {
+                showAlert('A new version is available. It will be downloaded in the background.', 'info');
+            });
+            
+            launcherApi.onUpdateDownloaded(() => {
+                showAlert('Update downloaded! The app will restart to install the update.', 'success');
+            });
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertsDiv = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            alertsDiv.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        function addLog(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            
+            // Keep only last 50 logs
+            while (logsDiv.children.length > 50) {
+                logsDiv.removeChild(logsDiv.firstChild);
+            }
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (statusCheckInterval) clearInterval(statusCheckInterval);
+            if (updateCheckInterval) clearInterval(updateCheckInterval);
+        });
+    </script>
+</body>
+</html>

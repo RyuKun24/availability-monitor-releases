@@ -1,0 +1,1295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Availability Monitor</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+    :root {
+      --bg: #f5f3ec;
+      --bg-soft: #ece8de;
+      --card: #fffdfa;
+      --card-strong: #fff;
+      --ink: #1f2e3d;
+      --muted: #5b6f83;
+      --accent: #0f766e;
+      --accent-2: #0ea5a4;
+      --danger: #c2410c;
+      --line: #d7dfeb;
+      --shadow: 0 14px 38px rgba(18, 32, 57, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", Tahoma, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%, #c6ece9 0%, rgba(198, 236, 233, 0) 34%),
+        radial-gradient(circle at 93% 9%, #ffd8b0 0%, rgba(255, 216, 176, 0) 28%),
+        linear-gradient(160deg, var(--bg) 0%, var(--bg-soft) 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 24px auto 42px;
+      padding: 0 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(130, 152, 182, 0.2);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(1.45rem, 2.8vw, 2rem);
+      color: #0f2743;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.03rem;
+      letter-spacing: 0.01em;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #3a4c61;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(15, 118, 110, 0.65);
+      box-shadow: 0 0 0 3px rgba(14, 165, 164, 0.18);
+    }
+
+    .half {
+      width: min(330px, 100%);
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 15px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      box-shadow: 0 8px 18px rgba(15, 118, 110, 0.22);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(15, 118, 110, 0.27);
+      filter: brightness(1.03);
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, #b91c1c, var(--danger));
+      box-shadow: 0 8px 18px rgba(194, 65, 12, 0.22);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, #355070, #4b6990);
+      box-shadow: 0 8px 18px rgba(53, 80, 112, 0.23);
+    }
+
+    .hero-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .hero-note {
+      margin: 2px 0 12px;
+      color: #4b637d;
+      font-size: 0.92rem;
+    }
+
+    .status-pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+    }
+
+    .on {
+      background: #0f766e;
+    }
+
+    .off {
+      background: #6b7280;
+    }
+
+    .waiting {
+      background: #b45309;
+    }
+
+    .status-detail {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      min-height: 1.2em;
+    }
+
+    .error {
+      color: var(--danger);
+      font-weight: 600;
+      min-height: 1.2em;
+    }
+
+    .ok {
+      color: var(--accent);
+      font-weight: 600;
+      min-height: 1.2em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 940px;
+    }
+
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 9px;
+      vertical-align: top;
+      font-size: 0.9rem;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    thead th {
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+
+    tbody tr:hover {
+      background: #f2f8ff;
+    }
+
+    .table-wrap {
+      margin-top: 10px;
+      overflow-x: auto;
+      border: 1px solid #dbe5f2;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .store-panels {
+      margin-top: 14px;
+      display: grid;
+      gap: 11px;
+    }
+
+    .store-panel {
+      border: 1px solid #dbe3ee;
+      border-radius: 14px;
+      background: var(--card-strong);
+      overflow: hidden;
+    }
+
+    .store-panel.is-collapsed .table-wrap {
+      display: none;
+    }
+
+    .store-panel-header {
+      width: 100%;
+      border: 0;
+      background: linear-gradient(125deg, #f8fafc, #ecf5ff);
+      color: #1f3b57;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: none;
+      border-radius: 0;
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .store-panel-header:hover {
+      transform: none;
+      box-shadow: none;
+      filter: none;
+      background: linear-gradient(125deg, #f3f9ff, #e4f0ff);
+    }
+
+    .store-panel-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .store-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      padding: 0 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #134e4a;
+      background: #ccfbf1;
+      border: 1px solid #99f6e4;
+    }
+
+    .store-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #4b637d;
+    }
+
+    .store-toggle-icon {
+      font-size: 0.86rem;
+      transition: transform 0.2s ease;
+    }
+
+    .store-panel.is-collapsed .store-toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    .store-scope {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f6fafc;
+    }
+
+    .store-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      font-size: 0.9rem;
+      color: #244132;
+    }
+
+    .store-chip input {
+      width: auto;
+      margin: 0;
+    }
+
+    .url-link {
+      color: #0f4b8a;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .url-link:hover {
+      text-decoration: underline;
+    }
+
+    .remove-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid #e8c8c8;
+      background: #fff5f5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--danger);
+    }
+
+    .remove-icon-btn:hover {
+      background: #ffe9e9;
+    }
+
+    .remove-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .title-inline {
+      min-width: 180px;
+      width: 100%;
+      padding: 7px 8px;
+      font-size: 0.9rem;
+    }
+
+    .title-auto-btn {
+      border: 1px solid #c8d3e8;
+      background: #f4f7ff;
+      color: #2b4c8a;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 8px;
+      box-shadow: none;
+    }
+
+    .title-auto-btn:hover {
+      transform: none;
+      box-shadow: none;
+      filter: none;
+      background: #e8efff;
+    }
+
+    .cell-reason {
+      color: #334155;
+    }
+
+    .cart-cfg-cell {
+      min-width: 150px;
+    }
+
+    .auto-cart-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.84rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .max-price-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .max-price-lbl {
+      font-size: 0.84rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .max-price-input {
+      width: 80px;
+      padding: 4px 6px;
+      font-size: 0.84rem;
+    }
+
+    .cart-status-ok {
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .cart-status-err {
+      font-size: 0.78rem;
+      color: var(--danger);
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .last-price-badge {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .local-time-note {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 6px;
+    }
+
+    .store-description {
+      margin: 8px 2px 0;
+      font-size: 0.82rem;
+      color: #637b97;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        padding: 0 12px;
+      }
+
+      .card {
+        padding: 14px;
+        border-radius: 14px;
+      }
+
+      .hero-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      table {
+        min-width: 760px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .row {
+        gap: 10px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .store-panel-header {
+        padding: 12px;
+      }
+
+      .store-toggle-label {
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="hero-head">
+        <h1>Availability Monitor</h1>
+        <span id="running-pill" class="status-pill off">Stopped</span>
+      </div>
+      <p class="hero-note">Live dashboard for availability tracking and quick cart actions by store.</p>
+      <div class="row">
+        <button id="start-btn">Start</button>
+        <button id="stop-btn" class="danger">Stop</button>
+        <button id="refresh-btn" class="secondary">Refresh</button>
+      </div>
+      <p id="status-detail" class="status-detail"></p>
+      <p id="service-error" class="error"></p>
+    </div>
+
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="row">
+        <div class="half">
+          <label>Telegram Bot Token</label>
+          <input id="token" type="password" placeholder="Configured" autocomplete="new-password" />
+        </div>
+        <div class="half">
+          <label>Telegram Chat ID</label>
+          <input id="chat-id" type="text" placeholder="Chat id" />
+        </div>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <div class="half">
+          <label>Check Interval (seconds)</label>
+          <input id="interval" type="number" min="1" />
+        </div>
+        <div class="half">
+          <label>Alert Cooldown (seconds)</label>
+          <input id="cooldown" type="number" min="0" />
+        </div>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <div class="half">
+          <label>Start Time After Pressing Start (local)</label>
+          <input id="monitor-start-time" type="time" />
+          <div class="local-time-note">Local time on this computer: <span id="local-time-display">--:--</span></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <button id="save-settings">Save Settings</button>
+      </div>
+      <p id="settings-msg" class="ok"></p>
+      <p id="settings-err" class="error"></p>
+    </div>
+
+    <div class="card">
+      <h2>Monitored Links</h2>
+      <div class="row">
+        <input id="new-title" type="text" placeholder="Title (optional)" />
+        <input id="new-url" type="url" placeholder="https://www.amazon.com/... or https://www.target.com/... or https://www.walmart.com/..." />
+        <button id="add-url">Add Link</button>
+      </div>
+      <div class="store-scope">
+        <div style="font-weight:600; margin-bottom: 6px;">Active Store Monitoring</div>
+        <label class="store-chip">
+          <input id="store-amazon" type="checkbox" checked /> Amazon
+        </label>
+        <label class="store-chip">
+          <input id="store-target" type="checkbox" checked /> Target
+        </label>
+        <label class="store-chip">
+          <input id="store-walmart" type="checkbox" checked /> Walmart
+        </label>
+        <label class="store-chip">
+          <input id="store-other" type="checkbox" checked /> Other
+        </label>
+        <button id="save-store-scope" class="secondary" style="padding: 7px 12px;">Apply Store Filter</button>
+      </div>
+      <p id="url-err" class="error"></p>
+
+      <div class="store-panels">
+        <section id="panel-amazon" class="store-panel">
+          <button class="store-panel-header" data-panel="amazon" type="button">
+            <span class="store-panel-title">Amazon Links <span id="count-amazon" class="store-count">0</span></span>
+            <span class="store-toggle-label"><span id="label-amazon">Hide</span><span class="store-toggle-icon">▾</span></span>
+          </button>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Reason</th>
+                  <th>Next Check</th>
+                  <th>URL</th>
+                  <th>Cart</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rows-amazon"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="panel-target" class="store-panel">
+          <button class="store-panel-header" data-panel="target" type="button">
+            <span class="store-panel-title">Target Links <span id="count-target" class="store-count">0</span></span>
+            <span class="store-toggle-label"><span id="label-target">Hide</span><span class="store-toggle-icon">▾</span></span>
+          </button>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Reason</th>
+                  <th>Next Check</th>
+                  <th>URL</th>
+                  <th>Cart</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rows-target"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="panel-walmart" class="store-panel">
+          <button class="store-panel-header" data-panel="walmart" type="button">
+            <span class="store-panel-title">Walmart Links <span id="count-walmart" class="store-count">0</span></span>
+            <span class="store-toggle-label"><span id="label-walmart">Hide</span><span class="store-toggle-icon">▾</span></span>
+          </button>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Reason</th>
+                  <th>Next Check</th>
+                  <th>URL</th>
+                  <th>Cart</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rows-walmart"></tbody>
+            </table>
+          </div>
+          <p class="store-description">Queue-aware add-to-cart can be enabled per Walmart link. Checkout remains manual.</p>
+        </section>
+
+        <section id="panel-other" class="store-panel">
+          <button class="store-panel-header" data-panel="other" type="button">
+            <span class="store-panel-title">Other Links <span id="count-other" class="store-count">0</span></span>
+            <span class="store-toggle-label"><span id="label-other">Hide</span><span class="store-toggle-icon">▾</span></span>
+          </button>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Reason</th>
+                  <th>Next Check</th>
+                  <th>URL</th>
+                  <th>Cart</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rows-other"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      urls: [],
+      urlMaxPrices: {},
+      urlAutoAddToCart: {},
+      urlAutoCheckout: {},
+      urlAutoPaypalPayment: {},
+      monitoredStores: ["amazon", "target", "walmart", "other"],
+      collapsedPanels: {
+        amazon: false,
+        target: false,
+        walmart: false,
+        other: false,
+      },
+    };
+    let isEditingTitle = false;
+    let isEditingCartConfig = false;
+
+    const el = (id) => document.getElementById(id);
+
+    async function fetchJSON(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      if (!response.ok) {
+        let message = `Request failed (${response.status})`;
+        try {
+          const payload = await response.json();
+          message = payload.detail || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+      return response.json();
+    }
+
+    function renderStatus(status) {
+      if (status.waiting_for_start_time) {
+        el("running-pill").textContent = "Waiting";
+        el("running-pill").className = "status-pill waiting";
+        el("status-detail").textContent = `Will start at ${status.scheduled_start_time_local || "--:--"} local time after Start.`;
+      } else if (status.running) {
+        el("running-pill").textContent = "Running";
+        el("running-pill").className = "status-pill on";
+        el("status-detail").textContent = status.scheduled_start_time_local
+          ? `Scheduled start setting: ${status.scheduled_start_time_local} local time.`
+          : "Starts immediately when you press Start.";
+      } else {
+        el("running-pill").textContent = "Stopped";
+        el("running-pill").className = "status-pill off";
+        el("status-detail").textContent = status.scheduled_start_time_local
+          ? `When you press Start, monitoring will wait until ${status.scheduled_start_time_local} local time.`
+          : "Monitoring starts immediately when you press Start.";
+      }
+      el("service-error").textContent = status.last_error || "";
+
+      const rowsAmazon = el("rows-amazon");
+      const rowsTarget = el("rows-target");
+      const rowsWalmart = el("rows-walmart");
+      const rowsOther = el("rows-other");
+      rowsAmazon.innerHTML = "";
+      rowsTarget.innerHTML = "";
+      rowsWalmart.innerHTML = "";
+      rowsOther.innerHTML = "";
+      state.urls = status.urls || [];
+
+      let amazonCount = 0;
+      let targetCount = 0;
+      let walmartCount = 0;
+      let otherCount = 0;
+
+      for (const item of state.urls) {
+        const tr = document.createElement("tr");
+        const store = detectStore(item.url, item.store);
+        const linkLabel = getUrlLinkLabel(item.url, item.title);
+        const _encodedUrl = encodeURIComponent(item.url);
+        const _autoAdd = !!(state.urlAutoAddToCart[item.url]);
+        const _autoCheckout = !!(state.urlAutoCheckout[item.url]);
+        const _autoPaypalPayment = !!(state.urlAutoPaypalPayment[item.url]);
+        const _maxPrice = state.urlMaxPrices[item.url] != null ? state.urlMaxPrices[item.url] : "";
+        const _isAmazon = store === "amazon";
+        const _isWalmart = store === "walmart";
+        const _cartStatusHtml = item.last_cart_added_at
+          ? `<div class="cart-status-ok">Added: ${escapeHtml(item.last_cart_added_at.slice(11, 16))}</div>`
+          : (item.cart_add_error ? `<div class="cart-status-err">${escapeHtml((item.cart_add_error || "").slice(0, 50))}</div>` : "");
+        const _priceHtml = item.last_price
+          ? `<div class="last-price-badge">${escapeHtml(item.last_price)}</div>` : "";
+        const cartCellHtml = _isWalmart ? `
+          <td class="cart-cfg-cell">
+            <label class="auto-cart-label">
+              <input type="checkbox" class="auto-cart-cb" data-url="${_encodedUrl}" ${_autoAdd ? "checked" : ""} />
+              Auto add after queue
+            </label>
+            <div class="max-price-wrap" style="display:${_autoAdd ? "flex" : "none"}">
+              <span class="max-price-lbl">Max&nbsp;$</span>
+              <input type="number" class="max-price-input" data-url="${_encodedUrl}" value="${escapeHtml(String(_maxPrice))}" min="0" step="0.01" placeholder="any" />
+            </div>
+            <div class="last-price-badge">Validates Walmart.com seller, can join the line, waits for turn, then adds to cart.</div>
+            <div class="last-price-badge">Checkout stays manual for Walmart.</div>
+            ${_priceHtml}
+            ${_cartStatusHtml}
+          </td>` : `
+          <td class="cart-cfg-cell">
+            <label class="auto-cart-label">
+              <input type="checkbox" class="auto-cart-cb" data-url="${_encodedUrl}" ${_autoAdd ? "checked" : ""} />
+              ${_isAmazon ? "Auto compra Amazon" : "Auto add"}
+            </label>
+            <label class="auto-cart-label" style="margin-top:4px; display:${_isAmazon ? "none" : (_autoAdd ? "flex" : "none")}">
+              <input type="checkbox" class="auto-checkout-cb" data-url="${_encodedUrl}" ${_autoCheckout ? "checked" : ""} />
+              Auto checkout
+            </label>
+            <label class="auto-cart-label" style="margin-top:4px; display:${_isAmazon ? "none" : (_autoAdd && _autoCheckout ? "flex" : "none")}">
+              <input type="checkbox" class="auto-paypal-cb" data-url="${_encodedUrl}" ${_autoPaypalPayment ? "checked" : ""} />
+              Auto PayPal pay
+            </label>
+            <div class="max-price-wrap" style="display:${_autoAdd ? "flex" : "none"}">
+              <span class="max-price-lbl">Max&nbsp;$</span>
+              <input type="number" class="max-price-input" data-url="${_encodedUrl}" value="${escapeHtml(String(_maxPrice))}" min="0" step="0.01" placeholder="any" />
+            </div>
+            ${_isAmazon ? '<div class="last-price-badge">Amazon flow: reserva, continuar/reintento, validar precio final y confirmar pedido.</div>' : ""}
+            ${_priceHtml}
+            ${_cartStatusHtml}
+          </td>`;
+        tr.innerHTML = `
+          <td>
+            <input
+              class="title-inline"
+              data-url="${encodeURIComponent(item.url)}"
+              data-original="${encodeURIComponent(item.title || "")}" 
+              value="${escapeHtml(item.title || "")}" 
+              placeholder="Automatic title"
+            />
+          </td>
+          <td>${item.available === true ? "Available" : item.available === false ? "Unavailable" : "Unknown"}</td>
+          <td>${escapeHtml(item.last_checked_at || "-")}</td>
+          <td class="cell-reason">${escapeHtml(item.error || item.reason || "-")}</td>
+          <td>${item.next_check_in_seconds ?? "-"}s</td>
+          <td>
+            <a class="url-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.url)}">
+              ${escapeHtml(linkLabel)}
+            </a>
+          </td>
+          ${cartCellHtml}
+          <td>
+            <button
+              data-url="${encodeURIComponent(item.url)}"
+              class="title-auto-btn"
+              title="Use automatic title"
+              aria-label="Use automatic title"
+            >Auto</button>
+            <button
+              data-url="${encodeURIComponent(item.url)}"
+              class="remove-btn remove-icon-btn"
+              title="Delete link"
+              aria-label="Delete link"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"></path>
+              </svg>
+            </button>
+          </td>
+        `;
+        if (store === "amazon") {
+          rowsAmazon.appendChild(tr);
+          amazonCount += 1;
+        } else if (store === "target") {
+          rowsTarget.appendChild(tr);
+          targetCount += 1;
+        } else if (store === "walmart") {
+          rowsWalmart.appendChild(tr);
+          walmartCount += 1;
+        } else {
+          rowsOther.appendChild(tr);
+          otherCount += 1;
+        }
+      }
+
+      if (amazonCount === 0) {
+        rowsAmazon.innerHTML = '<tr><td colspan="8">No Amazon links configured.</td></tr>';
+      }
+      if (targetCount === 0) {
+        rowsTarget.innerHTML = '<tr><td colspan="8">No Target links configured.</td></tr>';
+      }
+      if (walmartCount === 0) {
+        rowsWalmart.innerHTML = '<tr><td colspan="8">No Walmart links configured.</td></tr>';
+      }
+      if (otherCount === 0) {
+        rowsOther.innerHTML = '<tr><td colspan="8">No Other links configured.</td></tr>';
+      }
+
+      updateStorePanelCount("amazon", amazonCount);
+      updateStorePanelCount("target", targetCount);
+      updateStorePanelCount("walmart", walmartCount);
+      updateStorePanelCount("other", otherCount);
+
+      document.querySelectorAll(".remove-btn").forEach((btn) => {
+        btn.onclick = async () => {
+          const decoded = decodeURIComponent(btn.dataset.url);
+          await removeUrl(decoded);
+        };
+      });
+
+      document.querySelectorAll(".title-auto-btn").forEach((btn) => {
+        btn.onclick = async () => {
+          const decodedUrl = decodeURIComponent(btn.dataset.url);
+          await updateUrlTitle(decodedUrl, "");
+        };
+      });
+
+      document.querySelectorAll(".title-inline").forEach((input) => {
+        input.addEventListener("focus", () => {
+          isEditingTitle = true;
+        });
+
+        input.addEventListener("keydown", async (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            input.blur();
+          }
+        });
+
+        input.addEventListener("blur", async () => {
+          const decodedUrl = decodeURIComponent(input.dataset.url || "");
+          const original = decodeURIComponent(input.dataset.original || "").trim();
+          const current = input.value.trim();
+          isEditingTitle = false;
+
+          if (!decodedUrl || current === original) {
+            return;
+          }
+
+          try {
+            await updateUrlTitle(decodedUrl, current, false);
+            input.dataset.original = encodeURIComponent(current);
+          } catch (_) {
+            input.value = original;
+          }
+        });
+      });
+
+      document.querySelectorAll(".auto-cart-cb").forEach((cb) => {
+        cb.onchange = async () => {
+          const decodedUrl = decodeURIComponent(cb.dataset.url);
+          const cell = cb.closest("td");
+          const wrap = cell.querySelector(".max-price-wrap");
+          const checkoutWrap = cell.querySelector(".auto-checkout-cb")?.parentElement;
+          const paypalWrap = cell.querySelector(".auto-paypal-cb")?.parentElement;
+          if (wrap) wrap.style.display = cb.checked ? "flex" : "none";
+          if (checkoutWrap) checkoutWrap.style.display = cb.checked ? "flex" : "none";
+          if (!cb.checked) {
+            const checkoutCb = cell.querySelector(".auto-checkout-cb");
+            const paypalCb = cell.querySelector(".auto-paypal-cb");
+            if (checkoutCb) checkoutCb.checked = false;
+            if (paypalCb) paypalCb.checked = false;
+            if (paypalWrap) paypalWrap.style.display = "none";
+          }
+          const cfg = getCartConfigFromCell(cell);
+          await updateUrlCartConfig(decodedUrl, cfg.autoAddToCart, cfg.maxPrice, cfg.autoCheckout, cfg.autoPaypalPayment).catch(showTopError);
+        };
+      });
+
+      document.querySelectorAll(".auto-checkout-cb").forEach((cb) => {
+        cb.onchange = async () => {
+          const cell = cb.closest("td");
+          const decodedUrl = decodeURIComponent(cb.dataset.url);
+          const autoAdd = !!cell.querySelector(".auto-cart-cb")?.checked;
+          const paypalWrap = cell.querySelector(".auto-paypal-cb")?.parentElement;
+          const paypalCb = cell.querySelector(".auto-paypal-cb");
+          if (paypalWrap) paypalWrap.style.display = autoAdd && cb.checked ? "flex" : "none";
+          if (!cb.checked && paypalCb) {
+            paypalCb.checked = false;
+          }
+          const cfg = getCartConfigFromCell(cell);
+          await updateUrlCartConfig(decodedUrl, cfg.autoAddToCart, cfg.maxPrice, cfg.autoCheckout, cfg.autoPaypalPayment).catch(showTopError);
+        };
+      });
+
+      document.querySelectorAll(".auto-paypal-cb").forEach((cb) => {
+        cb.onchange = async () => {
+          const cell = cb.closest("td");
+          const decodedUrl = decodeURIComponent(cb.dataset.url);
+          const cfg = getCartConfigFromCell(cell);
+          await updateUrlCartConfig(decodedUrl, cfg.autoAddToCart, cfg.maxPrice, cfg.autoCheckout, cfg.autoPaypalPayment).catch(showTopError);
+        };
+      });
+
+      document.querySelectorAll(".max-price-input").forEach((input) => {
+        input.addEventListener("focus", () => { isEditingCartConfig = true; });
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+        });
+        input.addEventListener("blur", async () => {
+          isEditingCartConfig = false;
+          const decodedUrl = decodeURIComponent(input.dataset.url);
+          const cfg = getCartConfigFromCell(input.closest("td"));
+          await updateUrlCartConfig(decodedUrl, cfg.autoAddToCart, cfg.maxPrice, cfg.autoCheckout, cfg.autoPaypalPayment).catch(showTopError);
+        });
+      });
+    }
+
+    function getCartConfigFromCell(cell) {
+      const autoAddToCart = !!cell.querySelector(".auto-cart-cb")?.checked;
+      const autoCheckout = autoAddToCart && !!cell.querySelector(".auto-checkout-cb")?.checked;
+      const autoPaypalPayment = autoCheckout && !!cell.querySelector(".auto-paypal-cb")?.checked;
+      const priceInput = cell.querySelector(".max-price-input");
+      const maxPrice = priceInput && priceInput.value.trim() !== "" ? parseFloat(priceInput.value) : null;
+      return { autoAddToCart, autoCheckout, autoPaypalPayment, maxPrice };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function getUrlLinkLabel(url, title) {
+      const cleanTitle = (title || "").trim();
+      if (cleanTitle) {
+        return truncateText(cleanTitle, 64);
+      }
+
+      try {
+        const parsed = new URL(url);
+        const compact = `${parsed.hostname}${parsed.pathname === "/" ? "" : parsed.pathname}`;
+        return truncateText(compact || url, 64);
+      } catch (_) {
+        return truncateText(url, 64);
+      }
+    }
+
+    function truncateText(text, maxLen) {
+      const value = String(text || "").trim();
+      if (value.length <= maxLen) {
+        return value;
+      }
+      return `${value.slice(0, maxLen - 1)}...`;
+    }
+
+    function detectStore(url, fromApi = "") {
+      const apiStore = String(fromApi || "").toLowerCase();
+      if (apiStore === "amazon" || apiStore === "target" || apiStore === "walmart" || apiStore === "other") {
+        return apiStore;
+      }
+
+      const raw = String(url || "").toLowerCase();
+      if (raw.includes("amazon.")) {
+        return "amazon";
+      }
+      if (raw.includes("target.")) {
+        return "target";
+      }
+      if (raw.includes("walmart.")) {
+        return "walmart";
+      }
+      return "other";
+    }
+
+    function selectedStoresFromUi() {
+      const stores = [];
+      if (el("store-amazon").checked) {
+        stores.push("amazon");
+      }
+      if (el("store-target").checked) {
+        stores.push("target");
+      }
+      if (el("store-walmart").checked) {
+        stores.push("walmart");
+      }
+      if (el("store-other").checked) {
+        stores.push("other");
+      }
+      return stores;
+    }
+
+    async function saveStoreScope() {
+      el("settings-msg").textContent = "";
+      el("settings-err").textContent = "";
+      try {
+        const stores = selectedStoresFromUi();
+        if (stores.length === 0) {
+          throw new Error("Select at least one store");
+        }
+        await fetchJSON("/api/settings", {
+          method: "PATCH",
+          body: JSON.stringify({ monitored_stores: stores }),
+        });
+        state.monitoredStores = stores;
+        el("settings-msg").textContent = "Store filter updated";
+      } catch (error) {
+        el("settings-err").textContent = error.message;
+      }
+    }
+
+    async function loadSettings() {
+      const settings = await fetchJSON("/api/settings");
+      el("token").value = "";
+      el("token").placeholder = settings.telegram_bot_token_configured
+        ? (settings.telegram_bot_token_masked || "Configured")
+        : "Not configured";
+      el("chat-id").value = settings.telegram_chat_id || "";
+      el("interval").value = settings.check_interval_seconds ?? 30;
+      el("monitor-start-time").value = settings.monitor_start_time_local || "";
+      el("cooldown").value = settings.alert_recheck_cooldown_seconds ?? 600;
+      state.urlMaxPrices = settings.url_max_prices || {};
+      state.urlAutoAddToCart = settings.url_auto_add_to_cart || {};
+      state.urlAutoCheckout = settings.url_auto_checkout || {};
+      state.urlAutoPaypalPayment = settings.url_auto_paypal_payment || {};
+      state.monitoredStores = settings.monitored_stores || ["amazon", "target", "walmart", "other"];
+      el("store-amazon").checked = state.monitoredStores.includes("amazon");
+      el("store-target").checked = state.monitoredStores.includes("target");
+      el("store-walmart").checked = state.monitoredStores.includes("walmart");
+      el("store-other").checked = state.monitoredStores.includes("other");
+    }
+
+    async function refreshStatus() {
+      const status = await fetchJSON("/api/status");
+      renderStatus(status);
+    }
+
+    async function startMonitor() {
+      await fetchJSON("/api/monitor/start", { method: "POST" });
+      await refreshStatus();
+    }
+
+    async function stopMonitor() {
+      await fetchJSON("/api/monitor/stop", { method: "POST" });
+      await refreshStatus();
+    }
+
+    async function saveSettings() {
+      el("settings-msg").textContent = "";
+      el("settings-err").textContent = "";
+      try {
+        const payload = {
+          telegram_chat_id: el("chat-id").value,
+          check_interval_seconds: Number(el("interval").value),
+          monitor_start_time_local: el("monitor-start-time").value,
+          alert_recheck_cooldown_seconds: Number(el("cooldown").value),
+        };
+        const tokenValue = el("token").value.trim();
+        if (tokenValue) {
+          payload.telegram_bot_token = tokenValue;
+        }
+
+        await fetchJSON("/api/settings", {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        el("token").value = "";
+        await loadSettings();
+        el("settings-msg").textContent = "Settings saved";
+      } catch (error) {
+        el("settings-err").textContent = error.message;
+      }
+    }
+
+    async function addUrl() {
+      el("url-err").textContent = "";
+      const title = el("new-title").value.trim();
+      const url = el("new-url").value.trim();
+      if (!url) {
+        return;
+      }
+      try {
+        await fetchJSON("/api/urls", {
+          method: "POST",
+          body: JSON.stringify({ url, title }),
+        });
+        el("new-title").value = "";
+        el("new-url").value = "";
+        await refreshStatus();
+      } catch (error) {
+        el("url-err").textContent = error.message;
+      }
+    }
+
+    async function removeUrl(url) {
+      el("url-err").textContent = "";
+      try {
+        await fetchJSON("/api/urls", {
+          method: "DELETE",
+          body: JSON.stringify({ url }),
+        });
+        await refreshStatus();
+      } catch (error) {
+        el("url-err").textContent = error.message;
+      }
+    }
+
+    async function updateUrlTitle(url, title, refreshAfter = true) {
+      el("url-err").textContent = "";
+      try {
+        await fetchJSON("/api/urls/title", {
+          method: "PATCH",
+          body: JSON.stringify({ url, title }),
+        });
+        if (refreshAfter) {
+          await refreshStatus();
+        }
+      } catch (error) {
+        el("url-err").textContent = error.message;
+        throw error;
+      }
+    }
+
+    async function updateUrlCartConfig(url, autoAddToCart, maxPrice, autoCheckout = false, autoPaypalPayment = false) {
+      el("url-err").textContent = "";
+      try {
+        await fetchJSON("/api/urls/cart-config", {
+          method: "PATCH",
+          body: JSON.stringify({
+            url,
+            auto_add_to_cart: autoAddToCart,
+            auto_checkout: autoCheckout,
+            auto_paypal_payment: autoPaypalPayment,
+            max_price: maxPrice,
+          }),
+        });
+        // Refresh cached cart config so re-renders use the latest values.
+        const settings = await fetchJSON("/api/settings");
+        state.urlMaxPrices = settings.url_max_prices || {};
+        state.urlAutoAddToCart = settings.url_auto_add_to_cart || {};
+        state.urlAutoCheckout = settings.url_auto_checkout || {};
+        state.urlAutoPaypalPayment = settings.url_auto_paypal_payment || {};
+      } catch (error) {
+        el("url-err").textContent = error.message;
+        throw error;
+      }
+    }
+
+    async function init() {
+      el("start-btn").onclick = () => startMonitor().catch(showTopError);
+      el("stop-btn").onclick = () => stopMonitor().catch(showTopError);
+      el("refresh-btn").onclick = () => refreshStatus().catch(showTopError);
+      el("save-settings").onclick = () => saveSettings().catch(showTopError);
+      el("add-url").onclick = () => addUrl().catch(showTopError);
+      el("save-store-scope").onclick = () => saveStoreScope().catch(showTopError);
+      initStorePanels();
+
+      await loadSettings();
+      await refreshStatus();
+      updateLocalTimeDisplay();
+      setInterval(updateLocalTimeDisplay, 1000);
+      setInterval(() => {
+        if (isEditingTitle || isEditingCartConfig) {
+          return;
+        }
+        refreshStatus().catch(showTopError);
+      }, 3000);
+    }
+
+    function updateLocalTimeDisplay() {
+      const now = new Date();
+      el("local-time-display").textContent = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
+
+    function initStorePanels() {
+      loadCollapsedPanelState();
+      document.querySelectorAll(".store-panel-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          const panelKey = header.dataset.panel;
+          if (!panelKey) {
+            return;
+          }
+          const nextCollapsed = !state.collapsedPanels[panelKey];
+          setPanelCollapsed(panelKey, nextCollapsed, true);
+        });
+      });
+    }
+
+    function setPanelCollapsed(panelKey, collapsed, persist = false) {
+      const panel = el(`panel-${panelKey}`);
+      const label = el(`label-${panelKey}`);
+      if (!panel || !label) {
+        return;
+      }
+
+      state.collapsedPanels[panelKey] = !!collapsed;
+      panel.classList.toggle("is-collapsed", !!collapsed);
+      label.textContent = collapsed ? "Show" : "Hide";
+
+      if (persist) {
+        try {
+          localStorage.setItem("availability-monitor-collapsed-panels", JSON.stringify(state.collapsedPanels));
+        } catch (_) {}
+      }
+    }
+
+    function loadCollapsedPanelState() {
+      try {
+        const raw = localStorage.getItem("availability-monitor-collapsed-panels");
+        if (!raw) {
+          return;
+        }
+        const saved = JSON.parse(raw);
+        for (const panelKey of Object.keys(state.collapsedPanels)) {
+          if (typeof saved[panelKey] === "boolean") {
+            setPanelCollapsed(panelKey, saved[panelKey], false);
+          }
+        }
+      } catch (_) {}
+    }
+
+    function updateStorePanelCount(panelKey, count) {
+      const badge = el(`count-${panelKey}`);
+      if (!badge) {
+        return;
+      }
+      badge.textContent = String(count);
+    }
+
+    function showTopError(error) {
+      el("service-error").textContent = error.message;
+    }
+
+    init().catch(showTopError);
+  </script>
+</body>
+</html>

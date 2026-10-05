@@ -1,0 +1,23 @@
+{
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "check_interval_seconds": 30,
+  "monitor_start_time_local": null,
+  "alert_recheck_cooldown_seconds": 600,
+  "urls": [],
+  "url_max_prices": {},
+  "url_auto_add_to_cart": {},
+  "url_auto_checkout": {},
+  "url_auto_paypal_payment": {},
+  "monitored_stores": [
+    "amazon",
+    "target",
+    "walmart",
+    "other"
+  ],
+  "browser_user_data_dir": "",
+  "browser_cdp_url": "",
+  "browser_channel": "chrome",
+  "expected_ship_zip": "",
+  "enforce_ship_zip": true
+}

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "availability-monitor"
+version = "0.1.22"
+description = "Python monitor for Amazon, Target, Walmart product availability with Telegram alerts"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+
+dependencies = [
+    "beautifulsoup4>=4.12.0",
+    "requests>=2.32.0",
+    "python-dotenv>=1.0.0",
+    "playwright>=1.52.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0.0",
+    "pytest>=7.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+availability_alert = ["web/*"]
