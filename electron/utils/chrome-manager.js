@@ -15,10 +15,23 @@ class ChromeManager {
         return this.running;
     }
 
-    async start() {
+    getUserDataDir() {
+        const dir = path.join(os.homedir(), '.availability-monitor', 'chrome-profile');
+        fs.mkdirSync(dir, { recursive: true });
+        return dir;
+    }
+
+    async start(urls = []) {
         return new Promise((resolve, reject) => {
             try {
                 if (this.running) {
+                    if (urls.length > 0) {
+                        // Same profile dir makes Chrome open the URLs as tabs in the running instance
+                        spawn(this.findChromePath(), [
+                            `--user-data-dir=${this.getUserDataDir()}`,
+                            ...urls
+                        ], { stdio: 'ignore', detached: true }).unref();
+                    }
                     resolve({ success: true });
                     return;
                 }
@@ -33,10 +46,7 @@ class ChromeManager {
                 console.log(`Starting Chrome: ${chromePath}`);
 
                 // Create user data directory for session persistence
-                const userDataDir = path.join(os.homedir(), '.availability-monitor', 'chrome-profile');
-                if (!fs.existsSync(userDataDir)) {
-                    fs.mkdirSync(userDataDir, { recursive: true });
-                }
+                const userDataDir = this.getUserDataDir();
 
                 // Start Chrome with debug port
                 this.process = spawn(chromePath, [
@@ -44,7 +54,8 @@ class ChromeManager {
                     `--user-data-dir=${userDataDir}`,
                     '--disable-extensions',
                     '--disable-default-apps',
-                    '--no-first-run'
+                    '--no-first-run',
+                    ...urls
                 ], {
                     stdio: 'ignore',
                     detached: true

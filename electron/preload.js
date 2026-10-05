@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Chrome control
     openChrome: () => ipcRenderer.invoke('open-chrome'),
     closeChrome: () => ipcRenderer.invoke('close-chrome'),
+    openStoreLogins: () => ipcRenderer.invoke('open-store-logins'),
 
     // Dashboard
     openDashboard: () => ipcRenderer.invoke('open-dashboard'),

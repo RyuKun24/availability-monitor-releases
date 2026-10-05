@@ -324,6 +324,10 @@
         </div>
 
         <div class="buttons-section full">
+            <button id="store-logins-btn" class="btn-warning">🔑 Set Up Store Accounts</button>
+        </div>
+
+        <div class="buttons-section full">
             <button id="dashboard-btn" class="btn-info" disabled>📊 Open Dashboard</button>
         </div>
 
@@ -379,6 +383,7 @@
             document.getElementById('stop-btn').addEventListener('click', stopBackend);
             document.getElementById('open-chrome-btn').addEventListener('click', openChrome);
             document.getElementById('close-chrome-btn').addEventListener('click', closeChrome);
+            document.getElementById('store-logins-btn').addEventListener('click', openStoreLogins);
             document.getElementById('dashboard-btn').addEventListener('click', openDashboard);
             document.getElementById('check-updates-btn').addEventListener('click', checkForUpdates);
         }
@@ -445,6 +450,24 @@
                 }
             } catch (error) {
                 addLog(`✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function openStoreLogins() {
+            try {
+                addLog('Opening Amazon, Target and Walmart sign-in pages...', 'info');
+                const result = await launcherApi.openStoreLogins();
+
+                if (result.success) {
+                    addLog('✓ Sign in on each tab; the session is saved in the Chrome profile', 'success');
+                    updateStatus();
+                } else {
+                    addLog(`✗ Failed to open sign-in pages: ${result.error}`, 'error');
+                    showAlert(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                showAlert(`Error: ${error.message}`, 'error');
             }
         }
 

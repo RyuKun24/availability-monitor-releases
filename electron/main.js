@@ -160,6 +160,20 @@ function setupIPC() {
         }
     });
 
+    // Open Chrome on each store's sign-in page to set up accounts
+    ipcMain.handle('open-store-logins', async () => {
+        try {
+            await chromeManager.start([
+                'https://www.amazon.com/ap/signin',
+                'https://www.target.com/login',
+                'https://www.walmart.com/account/login'
+            ]);
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
     // Close Chrome
     ipcMain.handle('close-chrome', async () => {
         try {
