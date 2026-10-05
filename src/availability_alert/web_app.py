@@ -29,7 +29,9 @@ app = FastAPI(title="Availability Monitor")
 def run_web_app(host: str = "127.0.0.1", port: int = 8000) -> None:
     import uvicorn
 
-    uvicorn.run("src.availability_alert.web_app:app", host=host, port=port, reload=False)
+    # Windowed PyInstaller builds have no stdout/stderr, which breaks uvicorn's default log formatter.
+    log_config = None if sys.stderr is None or sys.stdout is None else uvicorn.config.LOGGING_CONFIG
+    uvicorn.run(app, host=host, port=port, reload=False, log_config=log_config)
 
 
 class UrlPayload(BaseModel):
