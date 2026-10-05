@@ -62,10 +62,12 @@ class PythonManager {
                 this.process.on('exit', (code) => {
                     console.log(`Python process exited with code ${code}`);
                     this.running = false;
+                    const tail = (this.stderr || this.stdout).trim().split('\n').slice(-8).join('\n');
+                    reject(new Error(`Backend exited with code ${code} before it was ready.${tail ? '\n' + tail : ''} Log: ${path.join(app.getPath('userData'), 'backend.log')}`));
                 });
 
                 // Wait for server to be ready
-                this.waitForServer(this.port, 30000)
+                this.waitForServer(this.port, 90000)
                     .then(() => {
                         resolve({ success: true, port: this.port });
                     })
@@ -120,7 +122,9 @@ class PythonManager {
             };
 
             const retry = () => {
-                if (Date.now() - startTime > timeout) {
+                if (!this.running) {
+                    reject(new Error('Backend process is not running'));
+                } else if (Date.now() - startTime > timeout) {
                     reject(new Error(`Server did not start within ${timeout}ms`));
                 } else {
                     setTimeout(checkConnection, 500);

@@ -1,4 +1,15 @@
 import argparse
+import sys
+
+if sys.stdout is None or sys.stderr is None:
+    # Windowed PyInstaller build: send output to a log file so crashes are diagnosable.
+    _log = open("backend.log", "a", buffering=1, encoding="utf-8")
+    sys.stdout = sys.stdout or _log
+    sys.stderr = sys.stderr or _log
+
+import faulthandler
+
+faulthandler.enable(file=sys.stderr)
 
 from src.availability_alert.main import run
 from src.availability_alert.web_app import run_web_app
