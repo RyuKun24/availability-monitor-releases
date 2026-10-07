@@ -1,8 +1,24 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const { app } = require('electron');
 const http = require('http');
 const os = require('os');
+const net = require('net');
+
+function findFreePort(preferred) {
+    return new Promise((resolve) => {
+        const tryPort = (port) => {
+            const srv = net.createServer();
+            srv.once('error', () => tryPort(0));
+            srv.listen(port, '127.0.0.1', () => {
+                const { port: found } = srv.address();
+                srv.close(() => resolve(found));
+            });
+        };
+        tryPort(preferred);
+    });
+}
 
 class PythonManager {
     constructor() {
@@ -18,6 +34,12 @@ class PythonManager {
     }
 
     async start() {
+        if (!this.running) {
+            // A stale server on the default port would otherwise pass the readiness check.
+            this.port = await findFreePort(8000);
+            this.stdout = '';
+            this.stderr = '';
+        }
         return new Promise((resolve, reject) => {
             try {
                 if (this.running) {
@@ -50,6 +72,7 @@ class PythonManager {
                 this.process.stderr.on('data', (data) => {
                     const message = data.toString();
                     this.stderr += message;
+                    try { fs.appendFileSync(path.join(app.getPath('userData'), 'backend.log'), message); } catch (e) {}
                     console.error(`[Python Error] ${message}`);
                 });
 

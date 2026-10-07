@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from threading import RLock
@@ -279,7 +280,8 @@ def _clean_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "url_auto_paypal_payment",
         "monitored_stores",
     }
-    cleaned = {k: v for k, v in payload.items() if k in known_keys}
+    # Saved files contain null for unset optional fields; treat them as absent.
+    cleaned = {k: v for k, v in payload.items() if k in known_keys and v is not None}
 
     if "urls" in cleaned and not isinstance(cleaned["urls"], list):
         raise ValueError("urls must be a list of strings")
@@ -329,14 +331,18 @@ class AppSettingsStore:
     def _load_or_initialize(self) -> AppSettings:
         if self._path.exists():
             try:
-                payload = json.loads(self._path.read_text(encoding="utf-8"))
+                payload = json.loads(self._path.read_text(encoding="utf-8-sig"))
                 if isinstance(payload, dict):
-                    loaded = AppSettings(**_clean_payload(payload))
+                    cleaned = _clean_payload(payload)
+                    cleaned.setdefault("telegram_bot_token", "")
+                    cleaned.setdefault("telegram_chat_id", "")
+                    loaded = AppSettings(**cleaned)
                     hydrated = _hydrate_missing_from_env(loaded)
                     if asdict(hydrated) != asdict(loaded):
                         self._write(hydrated)
                     return hydrated
-            except Exception:
+            except Exception as exc:
+                print(f"Invalid {self._path}: {exc!r}", file=sys.stderr, flush=True)
                 # Preserve unreadable settings for manual recovery instead of silently overwriting.
                 try:
                     backup_name = f"{self._path.name}.invalid-{datetime.now().strftime('%Y%m%d-%H%M%S')}.bak"
